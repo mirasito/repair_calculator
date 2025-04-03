@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    .main-content {
+        max-width: 1200px;
+        margin: 80px auto 40px;
+        padding: 0 20px;
+    }
+
+    .planning-container {
+        background: #FFFFFF;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .planning-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .planning-title {
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .planning-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .info-card {
+        background: #F9FAFB;
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .info-label {
+        font-size: 14px;
+        color: #6B7280;
+        margin-bottom: 8px;
+    }
+
+    .info-value {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .planning-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .week-column {
+        background: #F9FAFB;
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .week-header {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #E5E7EB;
+    }
+
+    .task-list {
+        min-height: 200px;
+    }
+
+    .task-item {
+        background: #FFFFFF;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 8px;
+        cursor: move;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .task-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .task-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .task-icon {
+        font-size: 16px;
+    }
+
+    .task-name {
+        font-weight: 500;
+    }
+
+    .task-duration {
+        font-size: 12px;
+        color: #6B7280;
+    }
+
+    .task-item.dragging {
+        opacity: 0.5;
+    }
+
+    .task-item.drag-over {
+        border: 2px dashed #000;
+    }
+
+    .add-week-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: #F3F4F6;
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .add-week-button:hover {
+        background: #E5E7EB;
+    }
+
+    .add-week-button svg {
+        margin-right: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .planning-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .planning-board {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <div class="planning-container">
+        <div class="planning-header">
+            <h1 class="planning-title">
+                <span class="text-ru">Планирование ремонта</span>
+                <span class="text-en" style="display: none;">Renovation Planning</span>
+            </h1>
+            <div class="planning-info">
+                <div class="info-card">
+                    <div class="info-label">
+                        <span class="text-ru">Смета</span>
+                        <span class="text-en" style="display: none;">Estimate</span>
+                    </div>
+                    <div class="info-value" id="estimateName"></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">
+                        <span class="text-ru">Общая стоимость</span>
+                        <span class="text-en" style="display: none;">Total Cost</span>
+                    </div>
+                    <div class="info-value" id="estimateCost"></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">
+                        <span class="text-ru">Длительность</span>
+                        <span class="text-en" style="display: none;">Duration</span>
+                    </div>
+                    <div class="info-value" id="totalDuration"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="planning-board" id="planningBoard">
+            <!-- Недели будут добавляться здесь -->
+            <button class="add-week-button" onclick="addNewWeek()">
+                <span class="text-ru">+ Добавить неделю</span>
+                <span class="text-en" style="display: none;">+ Add Week</span>
+            </button>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Загружаем данные сметы
+        const estimateId = window.location.pathname.split('/').pop();
+        const savedEstimates = JSON.parse(localStorage.getItem('savedEstimates') || '[]');
+        const estimate = savedEstimates[estimateId];
+
+        if (estimate) {
+            document.getElementById('estimateName').textContent = estimate.name;
+            document.getElementById('estimateCost').textContent = estimate.totalCost;
+            const totalDuration = estimate.steps.reduce((sum, step) => sum + step.duration, 0);
+            document.getElementById('totalDuration').textContent = `${totalDuration} ${document.getElementById('language').value === 'ru' ? 'дней' : 'days'}`;
+
+            // Загружаем сохраненный план
+            loadSavedPlan(estimateId);
+        }
+    });
+
+    function loadSavedPlan(estimateId) {
+        fetch(`/api/planning/${estimateId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.weeks && data.weeks.length > 0) {
+                    data.weeks.forEach(week => {
+                        createWeekColumn(week);
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading planning:', error));
+    }
+
+    function createWeekColumn(weekData = { number: null, tasks: [] }) {
+        const weekNumber = weekData.number || document.querySelectorAll('.week-column').length + 1;
+        const column = document.createElement('div');
+        column.className = 'week-column';
+        
+        const lang = document.getElementById('language').value;
+        column.innerHTML = `
+            <div class="week-header">
+                ${lang === 'ru' ? 'Неделя' : 'Week'} ${weekNumber}
+            </div>
+            <div class="task-list" ondrop="drop(event)" ondragover="allowDrop(event)">
+                ${weekData.tasks.map(task => createTaskItem(task)).join('')}
+            </div>
+        `;
+
+        const addButton = document.querySelector('.add-week-button');
+        document.getElementById('planningBoard').insertBefore(column, addButton);
+    }
+
+    function createTaskItem(task) {
+        const lang = document.getElementById('language').value;
+        return `
+            <div class="task-item" draggable="true" ondragstart="drag(event)" data-task-id="${task.id}">
+                <div class="task-title">
+                    <span class="task-icon">${task.icon}</span>
+                    <span class="task-name">${lang === 'ru' ? task.title : task.title_en}</span>
+                </div>
+                <div class="task-duration">${task.duration} ${lang === 'ru' ? 'дней' : 'days'}</div>
+            </div>
+        `;
+    }
+
+    function addNewWeek() {
+        createWeekColumn();
+        savePlanningData();
+    }
+
+    function savePlanningData() {
+        const estimateId = window.location.pathname.split('/').pop();
+        const weeks = Array.from(document.querySelectorAll('.week-column')).map((column, index) => ({
+            number: index + 1,
+            tasks: Array.from(column.querySelectorAll('.task-item')).map(task => ({
+                id: task.dataset.taskId,
+                title: task.querySelector('.task-name').textContent,
+                icon: task.querySelector('.task-icon').textContent,
+                duration: parseInt(task.querySelector('.task-duration').textContent)
+            }))
+        }));
+
+        fetch(`/api/planning/${estimateId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ weeks })
+        })
+        .catch(error => console.error('Error saving planning:', error));
+    }
+
+    // Drag and Drop функционал
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.dataset.taskId);
+        ev.target.classList.add('dragging');
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        const taskId = ev.dataTransfer.getData("text");
+        const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+        const targetList = ev.target.closest('.task-list');
+        
+        if (targetList && taskElement) {
+            targetList.appendChild(taskElement);
+            taskElement.classList.remove('dragging');
+            savePlanningData();
+        }
+    }
+</script>
+{% endblock %} 

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор ремонта</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">Калькулятор ремонта</a>
+            <nav class="nav-menu">
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <span class="text-ru">Расчет сметы</span>
+                    <span class="text-en" style="display: none;">Estimate</span>
+                </a>
+                <a href="/planning" class="nav-link {% if request.path.startswith('/planning') %}active{% endif %}">
+                    <span class="text-ru">Планирование</span>
+                    <span class="text-en" style="display: none;">Planning</span>
+                </a>
+                <a href="/budget" class="nav-link {% if request.path == '/budget' %}active{% endif %}">
+                    <span class="text-ru">Мой бюджет</span>
+                    <span class="text-en" style="display: none;">My Budget</span>
+                </a>
+                <a href="/marketplace" class="nav-link {% if request.path == '/marketplace' %}active{% endif %}">
+                    <span class="text-ru">Магазин</span>
+                    <span class="text-en" style="display: none;">Marketplace</span>
+                </a>
+            </nav>
+            <div class="settings">
+                <select id="language">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                </select>
+                <select id="currency">
+                    <option value="KZT">₸</option>
+                    <option value="USD">$</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Определение активной ссылки в навигации
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (currentPath === '/' && link.getAttribute('href') === '/') {
+                    link.classList.add('active');
+                } else if (currentPath.startsWith(link.getAttribute('href')) && link.getAttribute('href') !== '/') {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

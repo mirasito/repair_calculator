@@ -1,0 +1,551 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    .marketplace-container {
+        background: #FFFFFF;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .marketplace-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .marketplace-title {
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .search-section {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #000;
+    }
+
+    .filter-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: #F3F4F6;
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: background 0.3s ease;
+    }
+
+    .filter-button:hover {
+        background: #E5E7EB;
+    }
+
+    .categories {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+
+    .category-button {
+        padding: 8px 16px;
+        background: #F3F4F6;
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+    }
+
+    .category-button:hover {
+        background: #E5E7EB;
+    }
+
+    .category-button.active {
+        background: #000;
+        color: #FFF;
+    }
+
+    .vendors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    .vendor-card {
+        background: #FFFFFF;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .vendor-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .vendor-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .vendor-content {
+        padding: 16px;
+    }
+
+    .vendor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .vendor-name {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .vendor-category {
+        font-size: 14px;
+        color: #6B7280;
+    }
+
+    .vendor-rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        color: #6B7280;
+    }
+
+    .vendor-description {
+        font-size: 14px;
+        color: #374151;
+        margin-bottom: 16px;
+        line-height: 1.5;
+    }
+
+    .vendor-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .vendor-price {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .contact-button {
+        padding: 8px 16px;
+        background: #000;
+        color: #FFF;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.3s ease;
+    }
+
+    .contact-button:hover {
+        background: #333;
+    }
+
+    .filter-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: #FFFFFF;
+        border-radius: 12px;
+        padding: 24px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .close-button {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6B7280;
+    }
+
+    .filter-section {
+        margin-bottom: 24px;
+    }
+
+    .filter-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .filter-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-option input {
+        width: 16px;
+        height: 16px;
+    }
+
+    .filter-option label {
+        font-size: 14px;
+        color: #374151;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .modal-button {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .modal-button.reset {
+        background: #F3F4F6;
+        color: #000;
+        border: none;
+    }
+
+    .modal-button.reset:hover {
+        background: #E5E7EB;
+    }
+
+    .modal-button.apply {
+        background: #000;
+        color: #FFF;
+        border: none;
+    }
+
+    .modal-button.apply:hover {
+        background: #333;
+    }
+
+    @media (max-width: 768px) {
+        .marketplace-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .search-section {
+            flex-direction: column;
+        }
+
+        .filter-button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .vendors-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            margin: 16px;
+            width: calc(100% - 32px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <div class="marketplace-container">
+        <div class="marketplace-header">
+            <h1 class="marketplace-title">
+                <span class="text-ru">Магазин</span>
+                <span class="text-en" style="display: none;">Marketplace</span>
+            </h1>
+            <div class="search-section">
+                <input type="text" class="search-input" placeholder="Поиск товаров и услуг...">
+                <button class="filter-button" onclick="showFilters()">
+                    <span class="text-ru">Фильтры</span>
+                    <span class="text-en" style="display: none;">Filters</span>
+                    <span>⚡</span>
+                </button>
+            </div>
+            <div class="categories">
+                <button class="category-button active" data-category="all">
+                    <span class="text-ru">Все</span>
+                    <span class="text-en" style="display: none;">All</span>
+                </button>
+                <button class="category-button" data-category="materials">
+                    <span class="text-ru">Стройматериалы</span>
+                    <span class="text-en" style="display: none;">Materials</span>
+                </button>
+                <button class="category-button" data-category="tools">
+                    <span class="text-ru">Инструменты</span>
+                    <span class="text-en" style="display: none;">Tools</span>
+                </button>
+                <button class="category-button" data-category="furniture">
+                    <span class="text-ru">Мебель</span>
+                    <span class="text-en" style="display: none;">Furniture</span>
+                </button>
+                <button class="category-button" data-category="services">
+                    <span class="text-ru">Услуги</span>
+                    <span class="text-en" style="display: none;">Services</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="vendors-grid" id="vendorsContainer">
+            <!-- Карточки поставщиков будут добавляться здесь динамически -->
+        </div>
+    </div>
+
+    <div class="filter-modal" id="filtersModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span class="text-ru">Фильтры</span>
+                    <span class="text-en" style="display: none;">Filters</span>
+                </div>
+                <button class="close-button" onclick="hideFilters()">&times;</button>
+            </div>
+            <div class="filter-section">
+                <label class="filter-title">
+                    <span class="text-ru">Категории</span>
+                    <span class="text-en" style="display: none;">Categories</span>
+                </label>
+                <div class="filter-options">
+                    <input type="checkbox" id="filter-materials" class="filter-option">
+                    <label for="filter-materials" class="filter-option">
+                        <span class="text-ru">Стройматериалы</span>
+                        <span class="text-en" style="display: none;">Materials</span>
+                    </label>
+                    <input type="checkbox" id="filter-tools" class="filter-option">
+                    <label for="filter-tools" class="filter-option">
+                        <span class="text-ru">Инструменты</span>
+                        <span class="text-en" style="display: none;">Tools</span>
+                    </label>
+                    <input type="checkbox" id="filter-furniture" class="filter-option">
+                    <label for="filter-furniture" class="filter-option">
+                        <span class="text-ru">Мебель</span>
+                        <span class="text-en" style="display: none;">Furniture</span>
+                    </label>
+                    <input type="checkbox" id="filter-services" class="filter-option">
+                    <label for="filter-services" class="filter-option">
+                        <span class="text-ru">Услуги</span>
+                        <span class="text-en" style="display: none;">Services</span>
+                    </label>
+                </div>
+            </div>
+            <div class="filter-section">
+                <label class="filter-title">
+                    <span class="text-ru">Рейтинг</span>
+                    <span class="text-en" style="display: none;">Rating</span>
+                </label>
+                <div class="filter-options">
+                    <input type="checkbox" id="filter-rating-4" class="filter-option">
+                    <label for="filter-rating-4" class="filter-option">4+ ⭐</label>
+                    <input type="checkbox" id="filter-rating-3" class="filter-option">
+                    <label for="filter-rating-3" class="filter-option">3+ ⭐</label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-button reset" onclick="resetFilters()">
+                    <span class="text-ru">Сбросить</span>
+                    <span class="text-en" style="display: none;">Reset</span>
+                </button>
+                <button class="modal-button apply" onclick="applyFilters()">
+                    <span class="text-ru">Применить</span>
+                    <span class="text-en" style="display: none;">Apply</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Примеры данных поставщиков
+    const vendors = [
+        {
+            id: 1,
+            name: 'СтройМаркет',
+            name_en: 'StroyMarket',
+            category: 'materials',
+            category_ru: 'Стройматериалы',
+            category_en: 'Materials',
+            rating: 4.8,
+            reviews: 156,
+            image: 'https://via.placeholder.com/400x300'
+        },
+        {
+            id: 2,
+            name: 'Инструмент Про',
+            name_en: 'Tool Pro',
+            category: 'tools',
+            category_ru: 'Инструменты',
+            category_en: 'Tools',
+            rating: 4.5,
+            reviews: 89,
+            image: 'https://via.placeholder.com/400x300'
+        },
+        // Добавьте больше поставщиков здесь
+    ];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        renderVendors(vendors);
+        setupCategoryButtons();
+    });
+
+    function renderVendors(vendorsList) {
+        const container = document.getElementById('vendorsContainer');
+        const lang = document.getElementById('language').value;
+        
+        container.innerHTML = vendorsList.map(vendor => `
+            <div class="vendor-card">
+                <img src="${vendor.image}" alt="${lang === 'ru' ? vendor.name : vendor.name_en}" class="vendor-image">
+                <div class="vendor-content">
+                    <div class="vendor-header">
+                        <div class="vendor-name">${lang === 'ru' ? vendor.name : vendor.name_en}</div>
+                        <div class="vendor-category">${lang === 'ru' ? vendor.category_ru : vendor.category_en}</div>
+                    </div>
+                    <div class="vendor-rating">
+                        <div class="rating-stars">
+                            ${'⭐'.repeat(Math.floor(vendor.rating))}
+                            ${vendor.rating % 1 >= 0.5 ? '⭐' : ''}
+                        </div>
+                        <div class="rating-count">${vendor.reviews}</div>
+                    </div>
+                    <div class="vendor-description">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                    <div class="vendor-footer">
+                        <div class="vendor-price">${Math.floor(Math.random() * 1000) + 500} ₽</div>
+                        <button class="contact-button">
+                            <span class="text-ru">Связаться</span>
+                            <span class="text-en" style="display: none;">Contact</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function setupCategoryButtons() {
+        const buttons = document.querySelectorAll('.category-button');
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                buttons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const category = this.dataset.category;
+                const filteredVendors = category === 'all' 
+                    ? vendors 
+                    : vendors.filter(vendor => vendor.category === category);
+                
+                renderVendors(filteredVendors);
+            });
+        });
+    }
+
+    function showFilters() {
+        document.getElementById('filtersModal').style.display = 'flex';
+    }
+
+    function hideFilters() {
+        document.getElementById('filtersModal').style.display = 'none';
+    }
+
+    function resetFilters() {
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.checked = false;
+        });
+    }
+
+    function applyFilters() {
+        const selectedCategories = Array.from(document.querySelectorAll('.filter-option:checked'))
+            .map(option => option.id.replace('filter-', ''));
+        
+        const minRating = document.getElementById('filter-rating-4').checked ? 4 :
+                         document.getElementById('filter-rating-3').checked ? 3 : 0;
+        
+        let filteredVendors = vendors;
+        
+        if (selectedCategories.length > 0) {
+            filteredVendors = filteredVendors.filter(vendor => 
+                selectedCategories.includes(vendor.category)
+            );
+        }
+        
+        if (minRating > 0) {
+            filteredVendors = filteredVendors.filter(vendor => 
+                vendor.rating >= minRating
+            );
+        }
+        
+        renderVendors(filteredVendors);
+        hideFilters();
+    }
+</script>
+{% endblock %} 

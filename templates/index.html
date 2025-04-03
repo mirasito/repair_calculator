@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    .main-content {
+        max-width: 1200px;
+        margin: 80px auto 40px;
+        padding: 0 20px;
+    }
+
+    .calculator-section {
+        background: #FFFFFF;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .title-ru, .title-en {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 24px;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: #000;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .estimate-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        background: #FFFFFF;
+    }
+
+    .estimate-table th,
+    .estimate-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .estimate-table th {
+        font-weight: 500;
+        color: #374151;
+        background: #F9FAFB;
+    }
+
+    .estimate-table td {
+        color: #111827;
+    }
+
+    .estimate-table td:last-child {
+        text-align: center;
+    }
+
+    .delete-row {
+        color: #DC2626;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .delete-row:hover {
+        color: #B91C1C;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 24px 0 16px;
+        color: #111827;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-add {
+        background: #F3F4F6;
+        color: #111827;
+    }
+
+    .btn-add:hover {
+        background: #E5E7EB;
+    }
+
+    .btn-danger {
+        background: #DC2626;
+        color: #FFFFFF;
+    }
+
+    .btn-danger:hover {
+        background: #B91C1C;
+    }
+
+    .subtotal {
+        text-align: right;
+        font-weight: 600;
+        color: #111827;
+        padding: 12px 0;
+        border-top: 2px solid #E5E7EB;
+        margin-top: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .estimate-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .radio-group {
+            flex-direction: column;
+        }
+    }
+
+    .calculator-container {
+        background: white;
+        padding: 32px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .radio-button {
+        display: none;
+    }
+
+    .radio-label {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #F3F4F6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .radio-button:checked + .radio-label {
+        background: #000;
+        color: white;
+    }
+
+    .calculate-button {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        background: #000;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 500;
+        margin: 32px 0;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .calculate-button:hover {
+        background: #333;
+    }
+
+    #materialsSection, #worksSection {
+        display: none;
+    }
+
+    .show {
+        display: block !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <section class="calculator-section">
+        <h1 class="title-ru">Детали квартиры</h1>
+        
+        <div class="input-group">
+            <label class="input-label">Общая площадь квартиры (м²)</label>
+            <input type="number" class="input-field" id="totalArea" min="0" step="0.1">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Высота потолков (м)</label>
+            <input type="number" class="input-field" id="ceilingHeight" min="0" step="0.1">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Количество окон</label>
+            <input type="number" class="input-field" id="windowCount" min="0">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Требуется перепланировка?</label>
+            <div class="radio-group">
+                <input type="radio" id="yes" name="replanning" value="yes" class="radio-button">
+                <label for="yes" class="radio-label">Да</label>
+                
+                <input type="radio" id="no" name="replanning" value="no" class="radio-button">
+                <label for="no" class="radio-label">Нет</label>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Количество санузлов</label>
+            <input type="number" class="input-field" id="bathroomCount" min="0">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Площадь кухни (м²)</label>
+            <input type="number" class="input-field" id="kitchenArea" min="0" step="0.1">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Качество материалов</label>
+            <div class="radio-group">
+                <input type="radio" id="standard" name="quality" value="standard" class="radio-button">
+                <label for="standard" class="radio-label">Стандарт</label>
+                
+                <input type="radio" id="standard_plus" name="quality" value="standard_plus" class="radio-button">
+                <label for="standard_plus" class="radio-label">Стандарт+</label>
+                
+                <input type="radio" id="premium" name="quality" value="premium" class="radio-button">
+                <label for="premium" class="radio-label">Премиум</label>
+            </div>
+        </div>
+
+        <button class="calculate-button" onclick="calculateEstimate()">Рассчитать</button>
+    </section>
+
+    <section class="calculator-section" id="materialsSection">
+        <h2 class="section-title">Материалы</h2>
+        <button class="btn btn-add" onclick="addMaterial()">Добавить материал</button>
+        
+        <table class="estimate-table">
+            <thead>
+                <tr>
+                    <th>Наименование</th>
+                    <th>Ед. изм.</th>
+                    <th>Кол-во</th>
+                    <th>Цена</th>
+                    <th>Сумма</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="materialsTableBody">
+                <tr>
+                    <td>Кирпич строительный</td>
+                    <td>шт</td>
+                    <td>1000</td>
+                    <td>300 ₸</td>
+                    <td>300 000 ₸</td>
+                    <td><span class="delete-row">×</span></td>
+                </tr>
+                <tr>
+                    <td>Раствор цементный</td>
+                    <td>кг</td>
+                    <td>500</td>
+                    <td>200 ₸</td>
+                    <td>100 000 ₸</td>
+                    <td><span class="delete-row">×</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="subtotal">Итого по материалам: 400 000 ₸</div>
+    </section>
+
+    <section class="calculator-section" id="worksSection">
+        <h2 class="section-title">Работы</h2>
+        <button class="btn btn-add" onclick="addWork()">Добавить работу</button>
+        
+        <table class="estimate-table">
+            <thead>
+                <tr>
+                    <th>Наименование</th>
+                    <th>Ед. изм.</th>
+                    <th>Кол-во</th>
+                    <th>Цена</th>
+                    <th>Сумма</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="worksTableBody">
+                <tr>
+                    <td>Демонтаж стен</td>
+                    <td>м²</td>
+                    <td>100</td>
+                    <td>4 000 ₸</td>
+                    <td>400 000 ₸</td>
+                    <td><span class="delete-row">×</span></td>
+                </tr>
+                <tr>
+                    <td>Возведение стен</td>
+                    <td>м²</td>
+                    <td>100</td>
+                    <td>6 000 ₸</td>
+                    <td>600 000 ₸</td>
+                    <td><span class="delete-row">×</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="subtotal">Итого по работам: 1 000 000 ₸</div>
+    </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработчики для удаления строк
+        document.querySelectorAll('.delete-row').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('tr');
+                row.remove();
+                updateTotals();
+            });
+        });
+
+        // Обработчики для редактируемых ячеек
+        document.querySelectorAll('td:not(:last-child)').forEach(cell => {
+            cell.addEventListener('click', function() {
+                const currentValue = this.textContent;
+                const input = document.createElement('input');
+                input.value = currentValue;
+                input.style.width = '100%';
+                input.style.padding = '4px';
+                input.style.border = '1px solid #000';
+                input.style.borderRadius = '4px';
+                
+                const saveChanges = () => {
+                    this.textContent = input.value;
+                    updateTotals();
+                };
+
+                input.addEventListener('blur', saveChanges);
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        saveChanges();
+                    }
+                });
+
+                this.textContent = '';
+                this.appendChild(input);
+                input.focus();
+            });
+        });
+
+        // Функция обновления итогов
+        function updateTotals() {
+            // Обновление итогов по материалам
+            let materialsTotal = 0;
+            document.querySelectorAll('#materialsTableBody tr').forEach(row => {
+                const amount = parseFloat(row.cells[2].textContent);
+                const price = parseFloat(row.cells[3].textContent.replace(/[^0-9.-]+/g, ''));
+                const sum = amount * price;
+                row.cells[4].textContent = sum.toLocaleString('ru-RU') + ' ₸';
+                materialsTotal += sum;
+            });
+            document.querySelector('#materialsSection .subtotal').textContent = 
+                `Итого по материалам: ${materialsTotal.toLocaleString('ru-RU')} ₸`;
+
+            // Обновление итогов по работам
+            let worksTotal = 0;
+            document.querySelectorAll('#worksTableBody tr').forEach(row => {
+                const amount = parseFloat(row.cells[2].textContent);
+                const price = parseFloat(row.cells[3].textContent.replace(/[^0-9.-]+/g, ''));
+                const sum = amount * price;
+                row.cells[4].textContent = sum.toLocaleString('ru-RU') + ' ₸';
+                worksTotal += sum;
+            });
+            document.querySelector('#worksSection .subtotal').textContent = 
+                `Итого по работам: ${worksTotal.toLocaleString('ru-RU')} ₸`;
+        }
+
+        // Функции добавления новых строк
+        window.addMaterial = function() {
+            const tbody = document.getElementById('materialsTableBody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>Новый материал</td>
+                <td>шт</td>
+                <td>0</td>
+                <td>0 ₸</td>
+                <td>0 ₸</td>
+                <td><span class="delete-row">×</span></td>
+            `;
+            tbody.appendChild(tr);
+            updateTotals();
+        };
+
+        window.addWork = function() {
+            const tbody = document.getElementById('worksTableBody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>Новая работа</td>
+                <td>м²</td>
+                <td>0</td>
+                <td>0 ₸</td>
+                <td>0 ₸</td>
+                <td><span class="delete-row">×</span></td>
+            `;
+            tbody.appendChild(tr);
+            updateTotals();
+        };
+    });
+
+    function calculateEstimate() {
+        document.getElementById('materialsSection').classList.add('show');
+        document.getElementById('worksSection').classList.add('show');
+        updateTotals();
+    }
+</script>
+{% endblock %} 
