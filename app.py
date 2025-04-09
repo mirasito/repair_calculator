@@ -9,7 +9,7 @@ import sqlite3
 load_dotenv()
 
 app = Flask(__name__)
-
+#privet
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
